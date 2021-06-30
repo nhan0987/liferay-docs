@@ -44,11 +44,11 @@ Virtual Instances,
 3.  Check the box for the setting _Allow Administrators to Publish and Edit
     Workflows_.
 
-This only applies to Virtual Instances that have been added to the
-system. The Default Virtual Instance provides workflow publication access to
-Regular Administrators (via Control Panel &rarr; Configuration &rarr; Workflow),
-and, if running Liferay DXP, to Site Administrators and others with access to
-the Kaleo Designer and Kaleo Forms Admin applications.
+This only applies to Virtual Instances that have been added to the system. The
+Default Virtual Instance provides workflow publication access to Regular
+Administrators, via Control Panel &rarr; Configuration &rarr; Workflow and in
+Liferay DXP with access to the Kaleo Designer and Kaleo Forms Admin
+applications.
 
 ## Adding, Editing, and Deleting
 
@@ -61,7 +61,7 @@ To add a workflow definition,
 
 3.  From here you're either 
     [writing an XML definition](/docs/7-1/tutorials/-/knowledge_base/t/crafting-xml-workflow-definitions), 
-    [designing a definition in Kaleo Designer (DXP only)](https://customer.liferay.com/documentation/7.1/admin/-/official_documentation/portal/kaleo-designer), 
+    [designing a definition in Kaleo Designer (DXP only)](https://help.liferay.com/hc/en-us/articles/360017894912-Kaleo-Designer), 
     or
     [uploading an existing definition](#uploading-workflow-definitions).
 
@@ -107,7 +107,7 @@ upload it to @product@:
     Unpublished.
 
 Liferay DXP customers use the 
-[Kaleo Designer](https://customer.liferay.com/documentation/7.1/admin/-/official_documentation/portal/kaleo-designer)
+[Kaleo Designer](https://help.liferay.com/hc/en-us/articles/360017894912-Kaleo-Designer)
 to create workflows by default. To upload existing XML files in Kaleo Designer,
 
 1.  Navigate to Control Panel &rarr; Configuration &rarr; Workflow.

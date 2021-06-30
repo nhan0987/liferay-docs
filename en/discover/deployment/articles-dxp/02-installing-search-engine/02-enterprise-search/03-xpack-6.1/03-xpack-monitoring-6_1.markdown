@@ -10,10 +10,10 @@ Monitor Elasticsearch with X-Pack Monitoring. First
 [install X-Pack onto Elasticsearch](discover/deployment/-/knowledge_base-7-1/installing-x-pack)
 and configure security if you're using X-Pack's security features. Then come
 back here for instructions on installing and configuring Kibana (the monitoring
-server) with X-Pack so that Elasticsearch (secured with X-Pack), Kibana (secured
-with X-Pack), and @product@ can communicate effortlessly and securely. A Liferay
-Enterprise Search Standard subscription (included with Premium) is necessary for
-this integration.  Contact 
+server) with X-Pack so that Elasticsearch (secured with X-Pack), Kibana
+(secured with X-Pack), and @product@ can communicate effortlessly and securely.
+A Liferay Enterprise Search subscription is necessary for this integration.
+Contact 
 [Liferay's Sales department for more information](https://www.liferay.com/contact-us#contact-sales).
 
 1.  Download and install Kibana.
@@ -22,7 +22,7 @@ this integration.  Contact
     settings.
 
 3.  Download and install the 
-    [Liferay Connector to X-Pack Monitoring](https://www.liferay.com/marketplace) [Elastic Stack 6.x].
+    [Liferay Enterprise Search Monitoring](https://www.liferay.com/marketplace) app.
 
 4.  Configure the connector to communicate with Elasticsearch.
 
@@ -30,14 +30,14 @@ This document assumes you're enabling security *and* monitoring, though
 differences in the process are noted as appropriate.
 
 For the X-Pack installation procedure, refer to the 
-[X-Pack security article](/docs/7-1/deploy/-/knowledge_base/d/installing-x-pack-security-6-1).
+[security article](/docs/7-1/deploy/-/knowledge_base/d/installing-x-pack-security-6-1).
 
 Start with the installation of Kibana.
 
 ## Install Kibana
 
 Make sure to install the correct version of Kibana. Check the 
-[Liferay Enterprise Search compatibility matrix](https://web.liferay.com/group/customer/dxp/support/compatibility-matrix/enterprise-search)
+[Liferay Enterprise Search compatibility matrix](https://help.liferay.com/hc/en-us/articles/360016511651#Liferay-Enterprise-Search)
 for details.
 
 1.  [Download Kibana](https://www.elastic.co/downloads/kibana) and extract it.
@@ -115,10 +115,10 @@ environment, refer to
 After this step you can access Kibana at `https://localhost:5601` and sign in
 with a Kibana user. The last step is to hook Kibana up with @product@.
 
-## Configuring the Liferay Connector to X-Pack Monitoring
+## Configuring the Liferay Enterprise Search Monitoring App
 
 If you have a Liferay Enterprise Search (Premium or Standard) subscription,
-download the Liferay Connector to X-Pack Monitoring [Elastic Stack 6.x]. Install
+download the Liferay Enterprise Search Monitoring app. Install
 the LPKG file by copying it into the `Liferay Home/deploy` folder. 
 
 1.  Once the connector is installed and Kibana and Elasticsearch are securely

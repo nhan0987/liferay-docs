@@ -14,13 +14,9 @@ the modules--together or separately.
 @product-ver@ bundles include the upgrade tool. If you installed @product-ver@
 manually, you can download the upgrade tool separately. 
 
-- *Liferay DXP 7.1*: Go to the
-[*Liferay DXP 7.1 Downloads* page](https://web.liferay.com/group/customer/dxp/downloads/7-1),
-select *Admin Tools*, and click *Download*. 
+- *Liferay DXP*: Go to the [*Downloads* page](https://customer.liferay.com/group/customer/downloads) and select the DXP version and the _Product/Service Packs_ file type. In the listing that appears, click _Download_ for the _Liferay DXP Upgrade Client_. 
 
-- *Liferay Portal CE 7.1*: Go to the
-[*Downloads* page](https://www.liferay.com/downloads-community)
-and select *Download* for *Liferay Portal Tools for 7.1*. 
+- *Liferay Portal CE*: Go to [SourceForge](https://sourceforge.net/projects/lportal/files/Liferay%20Portal/), select *7.0 GA[version]*, and click `liferay-ce-portal-tools-[version].zip`.
 
 Before running the upgrade tool, learn the tool's usage and how to configure the
 core upgrade and non-core module upgrades. 
@@ -147,22 +143,19 @@ Each file's properties are described next.
 
 ### Configuring app-server.properties
 
-Specify the following information to configure the app server on which 
-@product-ver@ is installed: 
+Specify the following information to configure the app server on which
+@product-ver@ is installed:
 
-**dir:**  the absolute path of the application server directory. *(required)*
+`dir`:  the absolute path of the application server directory. *(required)*
 
-**extra.lib.dirs:**  a comma delimited list of extra directories containing any
-binaries or resources to add to the class path. Use all absolute paths OR all 
-paths relative to **dir**. *(required)*
+`extra.lib.dirs`:  a comma delimited list of extra directories containing any
+binaries or resources to add to the class path. Use relative paths to `dir`. *(required)*
 
-**global.lib.dir:**  the application server's global library directory. Use 
-the absolute path or a path relative to **dir**. *(required)*
+`global.lib.dir`:  the application server's global library directory. Use a path relative to `dir`. *(required)*
 
-**portal.dir:**  the directory where portal is installed in your app server. Use
-the absolute path or a path relative to **dir**. *(required)*
+`portal.dir`:  the directory where portal is installed in your app server. Use a path relative to `dir`. *(required)*
 
-**server.detector.server.id:** ID of a supported application server. 
+`server.detector.server.id`: ID of a supported application server.
 (*required*) Here are the IDs:
 
 - `jboss`
@@ -173,52 +166,57 @@ the absolute path or a path relative to **dir**. *(required)*
 - `websphere`
 - `wildfly`
 
-Relative paths must use Unix style format. The following properties, for
-example, are for Windows and use relative paths:
 
-    dir=D:\
-    extra.lib.dirs=Liferay/liferay-portal-master/tomcat-9.0.10/bin
-    global.lib.dir=Liferay/liferay-portal-master/tomcat-9.0.10/lib
-    portal.dir=Liferay/liferay-portal-master/tomcat-9.0.10/webapps/ROOT
-    server.detector.server.id=tomcat
+Relative paths must use Unix style format (forward slashes) and start with a `/`. For example, the following properties are for Windows:
 
-These properties, for example, are for Unix and use all absolute paths:
+```properties
+dir=D:\liferay-dxp\tomcat-8.0.32
+extra.lib.dirs=/bin
+global.lib.dir=/lib
+portal.dir=/webapps/ROOT
+server.detector.server.id=tomcat
+```
 
-    dir=/
-    extra.lib.dirs=/home/user/liferay/liferay-portal-master/tomcat-9.0.10/bin
-    global.lib.dir=/home/user/liferay/liferay-portal-master/tomcat-9.0.10/lib
-    portal.dir=/home/user/liferay/liferay-portal-master/tomcat-9.0.10/webapps/ROOT
-    server.detector.server.id=tomcat
+As another example, the following properties are for Linux:
+
+```properties
+dir=/home/user/liferay
+extra.lib.dirs=/liferay-portal-master/tomcat-8.0.32/bin
+global.lib.dir=/liferay-portal-master/tomcat-8.0.32/lib
+portal.dir=/liferay-portal-master/tomcat-8.0.32/webapps/ROOT
+server.detector.server.id=tomcat
+```
 
 ### Configuring portal-upgrade-database.properties
 
 Specify the following information to configure the database you're upgrading.
 Note that these properties correspond exactly to the
 [JDBC portal properties](@platform-ref@/7.1-latest/propertiesdoc/portal.properties.html#JDBC)
-you'd use in a `portal-ext.properties` file. 
+you'd use in a `portal-ext.properties` file.
 
-**jdbc.default.driverClassName** *(required)*
+`jdbc.default.driverClassName` *(required)*
 
-**jdbc.default.url** *(required)*
+`jdbc.default.url` *(required)*
 
-**jdbc.default.username** *(required)*
+`jdbc.default.username` *(required)*
 
-**jdbc.default.password** *(required)*
+`jdbc.default.password` *(required)*
 
 ### Configuring portal-upgrade-ext.properties
 
-Specify the following information to configure the upgrade itself: 
+Add all portal properties, such as `portal-ext.properties` file properties, from your backup. The following properties are especially important to configure the upgrade:
 
-**liferay.home:** the [Liferay home folder](/docs/7-1/deploy/-/knowledge_base/d/installing-liferay#liferay-home) *(required)*
+`liferay.home`: the [Liferay home folder](/docs/7-1/deploy/-/knowledge_base/d/installing-liferay#liferay-home) *(required)*
 
-**dl.store.impl:** the implementation for persisting documents to the document
+`locales`: Liferay upgrades data for all of the specified locales. If you added locales to the property [in your `portal-ext.properties`](/docs/7-1/deploy/-/knowledge_base/d/preparing-an-upgrade-to-liferay-7#step-6-configuring-your-documents-and-media-file-store), specify the updated property here.
+
+`dl.store.impl`: the implementation for persisting documents to the document
 library store. This property's default value is
 `com.liferay.portal.store.file.system.FileSystemStore`.
-If you updated the property
-[in your `portal-ext.properties`](/docs/7-1/deploy/-/knowledge_base/d/preparing-an-upgrade-to-liferay-7#step-6-configuring-your-documents-and-media-file-store)
-to use a different implementation, specify the updated property here. 
+If you updated the property in your `portal-ext.properties`
+to use a different implementation, specify the updated property here.
 
-**hibernate.jdbc.batch_size:** the JDBC batch size used to improve performance;
+`hibernate.jdbc.batch_size`: the JDBC batch size used to improve performance;
 set to *250* by default *(optional)*
 
 ### Example Upgrade Configuration

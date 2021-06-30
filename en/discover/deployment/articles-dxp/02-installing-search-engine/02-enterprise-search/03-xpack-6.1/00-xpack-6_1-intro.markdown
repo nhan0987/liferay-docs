@@ -12,10 +12,8 @@ for securing and monitoring Elasticsearch clusters. If you use Elasticsearch,
 you should secure it with X-Pack. X-Pack's security features include
 authenticating access to the Elasticsearch cluster's data and encrypting
 Elasticsearch's internal and external communications. Most production systems
-requires these features. A Liferay Enterprise Search Premium subscription gets
-you access to two X-Pack Connectors for @product@: monitoring and security. A
-Liferay Enterprise Search Standard subscription gets you the monitoring
-integration. Contact
+requires these features. A Liferay Enterprise Search subscription gets you
+access to two X-Pack Connectors for @product@: monitoring and security. Contact
 [Liferay's Sales department for more information](https://www.liferay.com/contact-us#contact-sales).
 
 Here's an overview of using X-Pack to secure the data indexed in Elasticsearch:
@@ -27,10 +25,9 @@ Here's an overview of using X-Pack to secure the data indexed in Elasticsearch:
     [encryption](https://www.elastic.co/guide/en/elasticsearch/reference/6.1/configuring-tls.html#configuring-tls).
 
 3.  Download and install the 
-    [Liferay Connector to X-Pack Security](https://web.liferay.com/group/customer/dxp/downloads/enterprise-search) 
-    [Elastic Stack 6.x]. 
+    [Liferay Enterprise Search Security](https://web.liferay.com/group/customer/dxp/downloads/enterprise-search). 
 
-4.  Configure the X-Pack connector with the proper credentials and encryption
+4.  Configure the secuirty app with the proper credentials and encryption
     information.
 
 5.  Restart Elasticsearch.

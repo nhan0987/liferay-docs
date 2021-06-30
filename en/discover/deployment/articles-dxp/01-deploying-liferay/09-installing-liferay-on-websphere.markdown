@@ -41,6 +41,10 @@ these *Additional Files*:
 - Dependencies ZIP file
 - OSGi Dependencies ZIP file
 
+@product@ requires a Java JDK 8 or 11.
+
+| **Note:** Please see [the compatibility matrix](https://www.liferay.com/documents/10182/246659966/Liferay+DXP+7.1+Compatibility+Matrix.pdf/c8805b72-c693-1f26-3f2d-731ffc301366) for information on supported JDKs, databases, and environments.
+
 Without any further ado, get ready to install @product@ in WebSphere! 
 
 ## Preparing WebSphere for @product@
@@ -153,6 +157,8 @@ following inside the `jvmEntries` tag:
 Alternately, you can set the UTF-8 properties from the WebSphere Admin Console.
 (See below.)
 
+| **Important:** On JDK 11, the setting `-Djava.locale.providers=JRE,COMPAT,CLDR` is required to display four-digit years. Since JDK 9, the Unicode Common Locale Data Repository (CLDR) is the default locales provider. CLDR does not provide years in a four-digit format (see [LPS-87191](https://issues.liferay.com/browse/LPS-87191)). This setting works around the issue by using JDK 8's default locales provider.
+
 ### Removing the secureSessionCookie Tag
 
 In the same profile, you should delete a problematic `secureSessionCookie` tag 
@@ -166,8 +172,10 @@ Delete the `secureSessionCookie` tag containing
 
 If this tag is not removed, an error similar to this may occur: 
 
-    WSVR0501E: Error creating component com.ibm.ws.runtime.component.CompositionUnitMgrImpl@d74fa901    
-    com.ibm.ws.exception.RuntimeWarning: com.ibm.ws.webcontainer.exception.WebAppNotLoadedException: Failed to load webapp: Failed to load webapp: SRVE8111E: The application, LiferayEAR, is trying to modify a cookie which matches a pattern in the restricted programmatic session cookies list [domain=*, name=JSESSIONID, path=/].
+```
+WSVR0501E: Error creating component com.ibm.ws.runtime.component.CompositionUnitMgrImpl@d74fa901    
+com.ibm.ws.exception.RuntimeWarning: com.ibm.ws.webcontainer.exception.WebAppNotLoadedException: Failed to load webapp: Failed to load webapp: SRVE8111E: The application, LiferayEAR, is trying to modify a cookie which matches a pattern in the restricted programmatic session cookies list [domain=*, name=JSESSIONID, path=/].
+```
 
 ## Installing @product@'s Dependencies
 
@@ -175,65 +183,40 @@ You must now install @product@'s dependencies. Recall that earlier you
 downloaded two ZIP files containing these dependencies. Install their contents 
 now: 
 
-1.  `liferay-dxp-digital-enterprise-dependencies-[version].zip`: Unzip this file
+1.  `liferay-dxp-dependencies-[version].zip`: Unzip this file
     and place its contents in your WebSphere application server's `[Install
     Location]/WebSphere/AppServer/lib/ext` folder. If you have a JDBC database
     driver `JAR`, copy it to this location as well. 
 
-2.  From the same archive, copy `portlet.jar`into `[Install
-    Location]/WebSphere/AppServer/java/java-[version]/jre/lib/ext` for WebSphere 8.5.5.11 or `[Install
-    Location]/WebSphere/AppServer/javaext` for WebSphere 9.0.0.x. WebSphere already contains
-    an older version of `portlet.jar` which must be overridden at the highest
-    classloader level. The new `portlet.jar` (version 3) is
-    backwards-compatible. 
-
-3.  `liferay-dxp-digital-enterprise-osgi-[version].zip`: Unzip this file and 
+1.  `liferay-dxp-osgi-[version].zip`: Unzip this file and 
     place its contents in the `[Liferay Home]/osgi` folder (create this folder
     if it doesn't exist). This is typically `[Install
-    Location]/WebSphere/AppServer/profiles/your-profile/liferay/osgi`. 
+    Location]/WebSphere/AppServer/profiles/your-profile/liferay/osgi`.
 
-Before starting the server, verify that all the following jars have been copied 
-to the correct folders. Optional jars are available (italics) and are used to 
-optimize Liferay performance which must be added to this folder. Required jars 
-in bold are from the `liferay-digital-enterprise-dependencies-[version] zip`. The 
-following files should be present within the `lib/ext` (WebSphere Application) 
-folder: 
+### Installing the DXP portlet.jar
 
-1. `activation.jar`
-2. `com.liferay.registry.api.jar`
-3. `hsql.jar`
-4. A JDBC database jar (e.g. MySQL, MariaDB, IBM DB2, Postgres for production)
-5. `persistence.jar`
-6. `portal-kernel.jar`
-7. `portlet.jar`
+DXP's `portlet.jar` (version 3) is backwards-compatible. It is included with the Dependencies ZIP that you unzipped above. WebSphere contains an older `portlet.jar` version which must be overridden.
 
-The following folders should be present within the `/liferay/osgi` folder: 
+1. In your `[Install Location]/WebSphere/AppServer/profiles/your-profile/` folder, create a folder called `app_shared_libraries`.
 
-1. `Configs`
-2. `Core`
-3. `Marketplace`
-4. `Modules`
-5. `Portal`
-6. `Static`
-7. `Test`
-8. `War`
+1. Move DXP's `portlet.jar` from the `[Install Location]/WebSphere/AppServer/lib/ext` folder to the `app_shared_libraries` folder you created.
 
+1. Follow IBM's steps for [using a server associated shared library](https://www.ibm.com/support/pages/best-practice-using-common-application-files#usingserver); make sure to choose *Classes loaded with local class loader first (parent_Last)* on step 4d.
 
-### Ensuring that @product@'s portlet.jar is loaded first
+1. Save the configuration.
 
-In addition to placing the `portlet.jar` in the correct folder, you must
-configure the `config.ini` file so that it is loaded first. Navigate to
-`/IBM/WebSphere/AppServer/configuration/config.ini`.
+### Ensuring That the DXP Portlet.jar is Loaded First
 
-1. Find the property `com.ibm.CORBA,com.ibm`
+In addition to placing DXP's `portlet.jar` in a server associated shared library, configure the `config.ini` file so that it is loaded first.
 
-2. Insert the property `javax.portlet,javax.portlet.filter,javax.portlet.annotations`
-   after `com.ibm.CORBA` and before `com.ibm`.
+1. Open the `[Install Location]/WebSphere/AppServer/configuration/config.ini` file.
+1. Find the property `com.ibm.CORBA,com.ibm`.
+1. Insert the property
+    `javax.portlet,javax.portlet.filter,javax.portlet.annotations`
+    after `com.ibm.CORBA` and before `com.ibm`.
+1. Save the file.
 
-3. Save the file.
-
-Once you've installed these dependencies and configured the `config.ini` file,
-start the server profile you created for @product@. Once it starts, you're ready
+Start the server profile you created for @product@. Once it starts, you're ready
 to configure your database.
 
 ## Database Configuration

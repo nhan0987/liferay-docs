@@ -25,6 +25,10 @@ or
 - Dependencies ZIP file
 - OSGi Dependencies ZIP file
 
+@product@ requires a Java JDK 8 or 11.
+
+| **Note:** Please see [the compatibility matrix](https://www.liferay.com/documents/10182/246659966/Liferay+DXP+7.1+Compatibility+Matrix.pdf/c8805b72-c693-1f26-3f2d-731ffc301366) for information on supported JDKs, databases, and environments.
+
 Here are the basic steps for installing @product@ on Tomcat:
 
 - [Installing dependencies to your application server](#installing-dependencies)
@@ -44,25 +48,11 @@ bundle's JARs are not strictly required but can still be useful. If you don't
 have a bundle, download the required JARs from third-parties, as described
 below.
 
-1.  Create the folder `$TOMCAT_HOME/lib/ext` if it doesn't exist and extract the
-    JARs from the dependencies ZIP to it. Here are the JARs:
- 
-    - `com.liferay.petra.concurrent.jar`
-    - `com.liferay.petra.executor.jar`
-    - `com.liferay.petra.function.jar`
-    - `com.liferay.petra.io.jar`
-    - `com.liferay.petra.lang.jar`
-    - `com.liferay.petra.memory.jar`
-    - `com.liferay.petra.nio.jar`
-    - `com.liferay.petra.process.jar`
-    - `com.liferay.petra.reflect.jar`
-    - `com.liferay.petra.string.jar`
-    - `com.liferay.registry.api.jar`
-    - `hsql.jar`
-    - `portal-kernel.jar`
-    - `portlet.jar`
+1. Unzip the Dependencies ZIP file contents in the `$TOMCAT_HOME/lib/ext` folder (create this folder if it doesn't exist).
 
-2.  Download the following JARs or copy them from a @product@ Tomcat bundle to 
+2. Download a database driver `.jar` file and copy it to the `$CATALINA_BASE/lib/ext` folder. For a list of supported databases, see Liferay's [compatibility matrix](https://web.liferay.com/documents/14/21598941/Liferay+DXP+7.1+Compatibility+Matrix/9f9c917a-c620-427b-865d-5c4b4a00be85)
+
+3.  Download the following JARs or copy them from a @product@ Tomcat bundle to 
     the `$TOMCAT_HOME/lib/ext` folder:
 
     - [`activation.jar`](http://www.oracle.com/technetwork/java/javase/jaf-136260.html)
@@ -74,57 +64,7 @@ below.
     - [`persistence.jar`](http://mvnrepository.com/artifact/org.eclipse.persistence/javax.persistence/2.1.1)
     - [`support-tomcat.jar`](http://mvnrepository.com/artifact/com.liferay.portal/com.liferay.support.tomcat)
 
-3.  Copy the JDBC driver for your database to the `$CATALINA_BASE/lib/ext` 
-    folder. Here are some common drivers: 
-
-    - [`mariadb.jar`](https://downloads.mariadb.org/)
-    - [`mysql.jar`](http://dev.mysql.com/downloads/connector/j)
-    - [`postgresql.jar`](https://jdbc.postgresql.org/download/postgresql-42.0.0.jar)
-
-4.  Create an `osgi` folder in your Liferay Home. Extract the folders (i.e., 
-    `configs`, `core`, and more) from OSGi ZIP file to the `osgi` folder. The
-    `osgi` folder provides the necessary modules for @product@'s OSGi runtime.
-
-Checkpoint:
-
-1.  Your `$CATALINA_BASE/lib/ext` folder has these JARs:
-
-    - `activation.jar`
-    - `ccpp.jar`
-    - `com.liferay.petra.concurrent.jar`
-    - `com.liferay.petra.executor.jar`
-    - `com.liferay.petra.function.jar`
-    - `com.liferay.petra.io.jar`
-    - `com.liferay.petra.lang.jar`
-    - `com.liferay.petra.memory.jar`
-    - `com.liferay.petra.nio.jar`
-    - `com.liferay.petra.process.jar`
-    - `com.liferay.petra.reflect.jar`
-    - `com.liferay.petra.string.jar`
-    - `com.liferay.registry.api.jar`
-    - `hsql.jar`
-    - `jms.jar`
-    - `jta.jar`
-    - `jutf7.jar`
-    - `mail.jar`
-    - `mariadb.jar`
-    - `mysql.jar`
-    - `persistence.jar`
-    - `portal-kernel.jar`
-    - `portlet.jar`
-    - `postgresql.jar`
-    - `support-tomcat.jar`
-
-2. Your `[Liferay Home]/osgi` folder has these subfolders:
-
-    - `configs`
-    - `core`
-    - `marketplace`
-    - `modules`
-    - `portal`
-    - `static`
-    - `test`
-    - `war`
+4. Unzip the OSGi Dependencies ZIP file contents in the `[Liferay Home]/osgi` folder (create this folder if it doesn't exist).
 
 ## Configuring Tomcat
 
@@ -172,6 +112,8 @@ Start with configuring Tomcat to run @product@.
 
     | **Important:** For @product@ to work properly, the application server JVM
     | must use the `GMT` time zone and `UTF-8` file encoding.
+
+    | **Important:** On JDK 11, the setting `-Djava.locale.providers=JRE,COMPAT,CLDR` is required to display four-digit years. Since JDK 9, the Unicode Common Locale Data Repository (CLDR) is the default locales provider. CLDR does not provide years in a four-digit format (see [LPS-87191](https://issues.liferay.com/browse/LPS-87191)). This setting works around the issue by using JDK 8's default locales provider.
 
     After installation, tune your system (including these JVM options) for
     performance. 
@@ -293,21 +235,23 @@ If you want Tomcat to manage your data source, follow these steps:
 2.  Open `$CATALINA_BASE/conf/Catalina/localhost/ROOT.xml` and add your data 
     source as a `Resource` in your web application `Context`:
 
-        <Context...>
-            ...
-            <Resource
-                name="jdbc/LiferayPool"
-                auth="Container"
-                type="javax.sql.DataSource"
-                driverClassName="com.mysql.jdbc.Driver"
-                url="jdbc:mysql://localhost/lportal?useUnicode=true&amp;characterEncoding=UTF-8"
-                username="root"
-                password="root"
-                maxActive="100"
-                maxIdle="30"
-                maxWait="10000"
-            />
-        </Context>
+    ```xml
+    <Context...>
+        ...
+        <Resource
+            name="jdbc/LiferayPool"
+            auth="Container"
+            type="javax.sql.DataSource"
+            driverClassName="com.mysql.jdbc.Driver"
+            url="jdbc:mysql://localhost/lportal?useUnicode=true&amp;characterEncoding=UTF-8"
+            username="root"
+            password="root"
+            maxTotal="100"
+            maxIdle="30"
+            maxWaitMillis="10000"
+        />
+    </Context>
+    ```
 
     The resource definition above is for a MySQL database named `lportal` that
     has a user named `root` whose password is `root`. Replace these values with

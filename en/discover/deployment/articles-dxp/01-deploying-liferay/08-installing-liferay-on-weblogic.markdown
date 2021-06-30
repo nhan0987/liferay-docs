@@ -32,118 +32,64 @@ these *Additional Files*:
 - Dependencies ZIP file
 - OSGi Dependencies ZIP file
 
-**Checkpoint**
+@product@ requires a Java JDK 8 or 11.
 
-The following jars should be present within the Dependencies ZIP file:
-
-1. `com.liferay.petra.concurrent.jar`
-2. `com.liferay.petra.executor.jar`
-3. `com.liferay.petra.function.jar`
-4. `com.liferay.petra.io.jar`
-5. `com.liferay.petra.lang.jar`
-6. `com.liferay.petra.memory.jar`
-7. `com.liferay.petra.nio.jar`
-8. `com.liferay.petra.process.jar`
-9. `com.liferay.petra.reflect.jar`
-10. `com.liferay.petra.string.jar`
-11. `com.liferay.registry.api.jar`
-12. `hsql.jar`
-13. `portal-kernel.jar`
-14. `portlet.jar`
-
-The following folders should be present within the `/liferay/osgi` folder: 
-
-1. `Configs`
-2. `Core`
-3. `Marketplace`
-4. `Modules`
-5. `Portal`
-6. `Static`
-7. `Test`
-8. `War`
-
+| **Note:** Please see [the compatibility matrix](https://www.liferay.com/documents/10182/246659966/Liferay+DXP+7.1+Compatibility+Matrix.pdf/c8805b72-c693-1f26-3f2d-731ffc301366) for information on supported JDKs, databases, and environments.
 
 Without any further ado, get ready to install @product@ in WebLogic! 
 
 ## Configuring WebLogic's Node Manager
 
-WebLogic requires a Node Manager to start and stop managed servers. Before 
-installing @product@, you must configure the Node Manager included with your 
-WebLogic installation. You'll do this via the 
-`domains/your_domain_name/nodemanager/nodemanager.properties` file. Open this 
-file and set the `SecureListener` property to `false`: 
+WebLogic's Node Manager starts and stops managed servers.
 
-    SecureListener=false
+If you're running WebLogic on a UNIX system other than Solaris or Linux, use the Java Node Manager, instead of the native version of the Node Manager, by configuring these Node Manager properties in the `domains/your_domain_name/nodemanager/nodemanager.properties` file:
 
-This setting disables the encryption (SSL) requirement for the Node Manager, 
-allowing it to accept unencrypted connections. Although it's possible to run 
-@product@ with this property set to `true`, you may encounter difficulties doing 
-so. Also note that with `SecureListener` set to `true`, you must configure your 
-machine in the Admin Server's console to accept unencrypted connections from the 
-Node Manager. To do this, first log in to your Admin Server and select 
-*Environment* &rarr; *Machines* from the *Domain Structure* box on the left. 
-Click your machine in the table and then select the *Configuration* &rarr; *Node 
-Manager* tab. In the *Type* field, select *Plain* from the selector menu, and 
-then click *Save*. You must restart your Admin Server for this change to take 
-effect. 
+```properties
+NativeVersionEnabled=false
 
-If you're running WebLogic on Mac or Linux, you may also need to set the 
-`NativeVersionEnabled` property to `false`: 
+StartScriptEnabled=true
+```
 
-    NativeVersionEnabled=false
+| **Note:**   By default, SSL is used with Node Manager. If you want to disable SSL during development, for example, set `SecureListener=false` in your `nodemanager.properties` file.
 
-This tells the Node Manager to start in non-native mode. This is required for 
-the platforms where WebLogic doesn't provide native Node Manager libraries. 
+See Oracle's [Configuring Java Node Manager](https://docs.oracle.com/middleware/1212/wls/NODEM/java_nodemgr.htm#NODEM173) documentation for details.
 
 ## Configuring WebLogic
 
-Next, you must set some variables in two WebLogic startup scripts. These 
-variables and scripts are as follows. Be sure to use `set` instead of `export` 
-if you're on Windows. 
+Configure the JVM and other options in a `setUserOverridesLate` WebLogic startup script and in your Managed Server UI.
 
-1.  `your-domain/startWebLogic.[cmd|sh]`: This is the Admin Server's startup
-    script. 
+1. Create a `setUserOverridesLate.sh` script in `[Your Domain]/bin`.
 
-2.  `your-domain/bin/startWebLogic.[cmd|sh]`: This is the startup script for
-    Managed Servers. 
+1. Add the following settings.
 
-    Add the following variables to both `startWebLogic.[cmd|sh]` scripts:
-
-        export DERBY_FLAG="false"
-        export JAVA_OPTIONS="${JAVA_OPTIONS} -Dfile.encoding=UTF-8 -Duser.timezone=GMT -da:org.apache.lucene... -da:org.aspectj..."
-        export MW_HOME="/your/weblogic/directory"
-        export USER_MEM_ARGS="-Xmx2048m"
+    ```bash
+    export DERBY_FLAG="false"
+    export JAVA_OPTIONS="${JAVA_OPTIONS} -Dfile.encoding=UTF-8 -Duser.timezone=GMT -da:org.apache.lucene... -da:org.aspectj..."
+    export JAVA_PROPERTIES="-Dfile.encoding=UTF-8 ${JAVA_PROPERTIES} ${CLUSTER_PROPERTIES}"
+    export MW_HOME="[place your WebLogic Server folder path here]"
+    export USER_MEM_ARGS="-Xms512m -Xmx2048m"
+    export WLS_MEM_ARGS_64BIT="-Xms512m -Xmx2048m"
+    export WLS_MEM_ARGS_32BIT="-Xms512m -Xmx2048m"
+    ```
 
     | **Important:** For @product@ to work properly, the application server JVM
     | must use the `GMT` time zone and `UTF-8` file encoding.
+
+    | **Important:** On JDK 11, the setting `-Djava.locale.providers=JRE,COMPAT,CLDR` is required to display four-digit years. Since JDK 9, the Unicode Common Locale Data Repository (CLDR) is the default locales provider. CLDR does not provide years in a four-digit format (see [LPS-87191](https://issues.liferay.com/browse/LPS-87191)). This setting works around the issue by using JDK 8's default locales provider.
     
-    The `DERBY_FLAG` setting disables the Derby server built in to WebLogic, as 
-    @product@ doesn't require this server. The remaining settings support @product@'s 
-    memory requirements, UTF-8 requirement, Lucene usage, and Aspect Oriented 
-    Programming via AspectJ. Also make sure to set `MW_HOME` to the directory 
-    containing your WebLogic server on your machine. For example: 
+    The `DERBY_FLAG` setting disables the Derby server built in to WebLogic, as DXP does not require this server.
+    
+    `JAVA_OPTIONS` sets DXP's UTF-8 requirement, Lucene usage, and Aspect Oriented Programming via AspectJ.
 
-        export MW_HOME="/Users/ray/Oracle/wls12210"
+    `JAVA_PROPERTIES` also sets DXP's UTF-8 requirement.
 
+    Set `MW_HOME` to the folder containing the WebLogic server on the machine. For example,
 
-3.  Some of the settings are also found in the `your-domain/bin/SetDomainEnv.[cmd|sh]` . Add the following variables (Windows):
-
-        set WLS_MEM_ARGS_64BIT=-Xms512m -Xmx2048m 
-        set WLS_MEM_ARGS_32BIT=-Xms512m -Xmx2048m
-
-    or on Mac or Linux:
-
-        WLS_MEM_ARGS_64BIT="-Xms512m -Xmx2048m"
-        export WLS_MEM_ARGS_64BIT
-
-        WLS_MEM_ARGS_32BIT="-Xms512m -Xmx2048m"
-        export WLS_MEM_ARGS_32BIT
-
-4.  Set the Java file encoding to UTF-8 in 
-    `your-domain/bin/SetDomainEnv.[cmd|sh]` by appending `-Dfile.encoding=UTF-8`
-    ahead of your other Java properties:  
-
-        JAVA_PROPERTIES="-Dfile.encoding=UTF-8 ${JAVA_PROPERTIES} ${CLUSTER_PROPERTIES}"
+    ```bash
+    export MW_HOME="/Users/ray/Oracle/wls12210"
+    ```
+        
+    The `*_MEM_ARGS` variables set DXP's starting and maximum heap memory capacity.
 
 5.  You must also ensure that the Node Manager sets @product@'s memory
     requirements when starting the Managed Server. In the Admin Server's console
@@ -196,53 +142,14 @@ You must now install @product@'s dependencies. Recall that earlier you
 downloaded two ZIP files containing these dependencies. Install their contents 
 now: 
 
-1.  `liferay-dxp-digital-enterprise-dependencies-[version].zip`: Unzip this file 
+1.  `liferay-dxp-dependencies-[version].zip`: Unzip this file 
     and place its contents in your WebLogic domain's `lib` folder. 
 
-2.  `liferay-dxp-digital-enterprise-osgi-[version].zip`: Unzip this file and 
-    place its contents in the `Liferay_Home/osgi` folder (create this folder if
+2.  `liferay-dxp-osgi-[version].zip`: Unzip this file and 
+    place its contents in the `[Liferay Home]/osgi` folder (create this folder if
     it doesn't exist).
 
-You must also add your database's driver JAR file to your domain's `lib` folder.
-Note that although Hypersonic is fine for testing purposes, you **should not**
-use it for production @product@ instances. 
-
-**Checkpoint**
-
-Your domain `lib` folder has these jars:
-
-* `com.liferay.petra.concurrent.jar`
-* `com.liferay.petra.executor.jar`
-* `com.liferay.petra.function.jar`
-* `com.liferay.petra.io.jar`
-* `com.liferay.petra.lang.jar`
-* `com.liferay.petra.memory.jar`
-* `com.liferay.petra.nio.jar`
-* `com.liferay.petra.process.jar`
-* `com.liferay.petra.reflect.jar`
-* `com.liferay.petra.string.jar`
-* `com.liferay.registry.api.jar`
-* `hsql.jar`
-* `portal-kernel.jar`
-* `portlet.jar`
-
-A JDBC driver for your database has been added to your domain's `lib` folder.
-Here are some common JDBC drivers:
-
-* [`mariadb.jar`](https://downloads.mariadb.org/) 
-* [`mysql.jar`](http://dev.mysql.com/downloads/connector/j)
-* [`postgres.jar`](https://jdbc.postgresql.org/download/postgresql-42.0.0.jar)
-
-Your `[Liferay Home]/osgi` folder has these subfolders:
-
-* `Configs`
-* `Core`
-* `Marketplace`
-* `Modules`
-* `Portal`
-* `Static`
-* `Test`
-* `War`
+3.  Download your database driver `.jar` file and copy it to your domain's `lib` folder. Please see the [compatibility matrix](https://web.liferay.com/documents/14/21598941/Liferay+DXP+7.1+Compatibility+Matrix/9f9c917a-c620-427b-865d-5c4b4a00be85) for a list of supported databases.
 
 Next, you'll configure your database. 
 
